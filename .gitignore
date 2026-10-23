@@ -1,0 +1,24 @@
+# --- Java / Maven / IntelliJ (Backend) ---
+target/
+.idea/
+*.class
+*.log
+.mvn/
+*.iml
+.settings/
+bin/
+
+# --- Spring Boot Configuration ---
+**/src/main/resources/application.properties
+
+# --- Node / React / Vite (Frontend) ---
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# --- Operating System Files ---
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

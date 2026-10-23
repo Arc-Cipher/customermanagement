@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-slate-800 antialiased;
+  }
+}
+
+/* ── Print styles ────────────────────────────────────────────────── */
+@media print {
+  /* Hide everything by default */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  body > * {
+    display: none !important;
+  }
+
+  /* Show ONLY the receipt root */
+  #receipt-print-root {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    background: white !important;
+    z-index: 99999 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #receipt-print-root * {
+    visibility: visible !important;
+    color: black !important;
+  }
+
+  /* Receipt paper width — 80mm thermal roll feel */
+  .receipt-paper {
+    width: 72mm !important;
+    margin: 0 auto !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    color: #000 !important;
+  }
+
+  /* No page margins */
+  @page {
+    margin: 8mm 4mm;
+    size: 80mm auto;
+  }
+}
