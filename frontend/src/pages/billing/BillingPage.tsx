@@ -50,6 +50,8 @@ import { Spinner } from '../../components/ui/Spinner';
 // ─── Session-persistence keys ────────────────────────────────────────────────
 const SESSION_CUSTOMER_KEY = 'billing_selected_customer';
 const SESSION_PHONE_KEY = 'billing_phone_search';
+const SESSION_CART_KEY = 'billing_cart';
+const SESSION_POINTS_KEY = 'billing_points_to_redeem';
 
 function sessionSave(key: string, value: unknown) {
   try {
@@ -255,8 +257,12 @@ export const BillingPage: React.FC = () => {
   const [productQuery, setProductQuery] = useState('');
   const debouncedProductQuery = useDebounce(productQuery, 300);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [pointsToRedeem, setPointsToRedeem] = useState<number>(0);
+  const [cart, setCart] = useState<CartItem[]>(
+    () => sessionLoad<CartItem[]>(SESSION_CART_KEY) ?? []
+  );
+  const [pointsToRedeem, setPointsToRedeem] = useState<number>(
+    () => sessionLoad<number>(SESSION_POINTS_KEY) ?? 0
+  );
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   // ── Receipt ─────────────────────────────────────────────────────────────
@@ -266,7 +272,7 @@ export const BillingPage: React.FC = () => {
   const productSearchRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Persist customer to sessionStorage whenever it changes
+  // Persist customer & cart to sessionStorage whenever they change
   useEffect(() => {
     sessionSave(SESSION_CUSTOMER_KEY, selectedCustomer);
   }, [selectedCustomer]);
@@ -274,6 +280,14 @@ export const BillingPage: React.FC = () => {
   useEffect(() => {
     sessionSave(SESSION_PHONE_KEY, phoneSearch);
   }, [phoneSearch]);
+
+  useEffect(() => {
+    sessionSave(SESSION_CART_KEY, cart);
+  }, [cart]);
+
+  useEffect(() => {
+    sessionSave(SESSION_POINTS_KEY, pointsToRedeem);
+  }, [pointsToRedeem]);
 
   // Show/hide dropdown
   useEffect(() => {
@@ -374,7 +388,7 @@ export const BillingPage: React.FC = () => {
     setShowRegisterForm(false);
     setNewCustomerName('');
     setPointsToRedeem(0);
-    sessionClear(SESSION_CUSTOMER_KEY, SESSION_PHONE_KEY);
+    sessionClear(SESSION_CUSTOMER_KEY, SESSION_PHONE_KEY, SESSION_POINTS_KEY);
   }, []);
 
   // ── Cart handlers ────────────────────────────────────────────────────────
@@ -448,6 +462,7 @@ export const BillingPage: React.FC = () => {
   const clearCart = () => {
     setCart([]);
     setPointsToRedeem(0);
+    sessionClear(SESSION_CART_KEY, SESSION_POINTS_KEY);
   };
 
   // ── Checkout ─────────────────────────────────────────────────────────────
@@ -471,6 +486,8 @@ export const BillingPage: React.FC = () => {
       });
       setCompletedPurchase(response);
       setShowReceipt(true);
+      clearCart();
+      handleClearCustomer();
       success('Sale completed!');
     } catch (err: unknown) {
       handleApiError(err, 'Failed to complete transaction');
